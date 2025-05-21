@@ -23,8 +23,23 @@ define( 'JET_EPUDS_PATH', plugin_dir_path( JET_EPUDS__FILE__ ) );
 class Jet_Engine_Public_User_Stores {
 
 	public function __construct() {
-		add_action( 'jet-engine/elementor-views/dynamic-tags/register', array( $this, 'register_dynamic_tags' ), 20 );
-		add_action( 'jet-engine/register-macros', array( $this, 'register_macros' ) );
+
+		add_action( 'init', function() {
+
+			if ( ! $this->data_stores_enabled() ) {
+
+				add_action( 'admin_notices', function() {
+					echo '<div class="notice notice-warning"><p><strong>JetEngine - public user meta stores:</strong> Data Stores module is not enabled. Please enable it to use this plugin.</p></div>';
+				} );
+
+				return;
+
+			}
+
+			add_action( 'jet-engine/elementor-views/dynamic-tags/register', array( $this, 'register_dynamic_tags' ), 20 );
+			add_action( 'jet-engine/register-macros', array( $this, 'register_macros' ) );
+
+		} );
 	}
 
 	/**
@@ -61,7 +76,7 @@ class Jet_Engine_Public_User_Stores {
 	 * @return [type] [description]
 	 */
 	public function data_stores_enabled() {
-		return class_exists( '\Jet_Engine\Modules\Data_Stores' );
+		return function_exists( 'jet_engine' ) && jet_engine()->modules->is_module_active( 'data-stores' );
 	}
 
 }
